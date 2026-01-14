@@ -1,0 +1,9 @@
+services:
+  mytb:
+    restart: always
+    image: thingsboard/tb-postgres:latest
+    ports:
+      - "8080:9001"
+      - "1883:1883"
+    volumes:
+      - ./mytb-data:/data
