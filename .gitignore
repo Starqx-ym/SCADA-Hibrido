@@ -1,0 +1,14 @@
+# Docker volumes / data
+mytb-data/
+postgres-data/
+
+# Logs
+*.log
+
+# Environment files
+.env
+
+# Node / frontend
+node_modules/
+dist/
+build/
