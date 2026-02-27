@@ -1,0 +1,16 @@
+Recomendaciones
+Con el fin de garantizar la escalabilidad y mejora continua del sistema SCADA dinámico desarrollado, se sugieren las siguientes líneas de optimización para futuros pasantes o desarrolladores:
+
+-Profundizar en la Arquitectura SCADA e Industria 4.0: Se recomienda al próximo pasante realizar una investigación teórica sólida sobre los sistemas de Supervisión, Control y Adquisición de Datos (SCADA). Es fundamental comprender cómo interactúan las capas de campo (sensores/actuadores) con la capa de aplicación (ThingsBoard) para proponer mejoras en la lógica de control.
+
+-Optimización de Activos Vectoriales (SVG): Investigar herramientas avanzadas de edición y optimización de código SVG (como SVGO o Inkscape). Se recomienda minimizar el número de nodos en los gráficos para reducir el tiempo de carga del DOM y mejorar el rendimiento de las animaciones en dispositivos de bajos recursos.
+
+-Estandarización de Nomenclatura y Limpieza de Código: Mantener la práctica de declarar variables con nombres intuitivos y descriptivos (p.e., batt_p_discharge en lugar de v1). Se recomienda implementar una guía de estilos de código (Linter) para que la integración de futuros widgets sea coherente con la arquitectura actual.
+
+-Implementación de Responsividad Avanzada: Si bien el proyecto usa ViewBox, se recomienda investigar técnicas de Media Queries dentro de los archivos SVG y CSS para adaptar la disposición de los activos (paneles, baterías, red) de forma dinámica cuando se visualice en dispositivos móviles o tablets.
+
+-Despliegue de Seguridad y Protocolos de Acceso: Se sugiere investigar la implementación de un Proxy Inverso (como Nginx Proxy Manager) en la máquina virtual. Esto permitiría cifrar la conexión mediante certificados SSL/TLS y gestionar de forma más segura el acceso al puerto 8081 desde redes externas.
+
+-Alertas Visuales y Lógica de Históricos: Una mejora sustancial sería integrar la API de ThingsBoard para no solo mostrar datos en tiempo real, sino también tendencias históricas. Se recomienda diseñar animaciones de "estado crítico" (parpadeos o cambios de opacidad) que se activen automáticamente cuando los sensores detecten valores fuera de los rangos de seguridad.
+
+-Investigación de Herramientas de Prototipado Dinámico: Continuar utilizando Figma pero explorando el uso de Tokens de Diseño. Esto permitiría que cualquier cambio de color o estilo en el prototipo se actualice automáticamente en el código CSS, reduciendo el error humano en la fase de traducción de diseño a código.
