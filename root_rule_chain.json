@@ -9,13 +9,17 @@
     "additionalInfo": null
   },
   "metadata": {
-    "version": 10,
+    "version": 48,
     "firstNodeIndex": 6,
     "nodes": [
       {
         "type": "org.thingsboard.rule.engine.telemetry.TbMsgTimeseriesNode",
         "name": "Save Timeseries",
-        "debugSettings": null,
+        "debugSettings": {
+          "failuresEnabled": false,
+          "allEnabled": false,
+          "allEnabledUntil": 0
+        },
         "singletonMode": false,
         "queueName": null,
         "configurationVersion": 1,
@@ -27,8 +31,9 @@
           }
         },
         "additionalInfo": {
-          "layoutX": 817,
-          "layoutY": 314
+          "description": null,
+          "layoutX": 820,
+          "layoutY": 374
         }
       },
       {
@@ -63,8 +68,8 @@
           "version": 0
         },
         "additionalInfo": {
-          "layoutX": 190,
-          "layoutY": 365
+          "layoutX": 212,
+          "layoutY": 297
         }
       },
       {
@@ -141,54 +146,14 @@
         "queueName": null,
         "configurationVersion": 0,
         "configuration": {
-          "scriptLang": "TBEL",
+          "scriptLang": "JS",
           "jsScript": "return {msg: msg, metadata: metadata, msgType: msgType};",
-          "tbelScript": "// Recuperamos los datos de los diferentes dispositivos\r\nvar p_fv = msg.p_in || 0;         // Solar\r\nvar p_wind = msg.p_dc || 0;       // Eólico\r\nvar p_house = msg.p_load || 500;  // Consumo casa\r\n\r\n// 1. Cálculo de generación total\r\nvar p_gen = p_fv + p_wind;\r\n\r\n// 2. Cálculo de balance (Generación - Consumo)\r\nvar balance = p_gen - p_house;\r\n\r\n// 3. Lógica de la Batería e Inversor\r\nvar p_batt = 0;\r\nvar status_batt = 'IDLE';\r\n\r\nif (balance > 0) {\r\n    p_batt = balance; // Sobra energía: cargamos batería\r\n    status_batt = 'CHARGING';\r\n} else {\r\n    p_batt = balance; // Falta energía: descargamos batería (valor negativo)\r\n    status_batt = 'DISCHARGING';\r\n}\r\n\r\n// 4. Actualizamos el mensaje con los nuevos datos calculados\r\nmsg.p_total_gen = p_gen;\r\nmsg.p_balance = balance;\r\nmsg.p_batt_flow = p_batt;\r\nmsg.batt_status = status_batt;\r\n\r\nreturn {msg: msg, metadata: metadata, msgType: msgType};"
+          "tbelScript": "return {\r\n    msg: {\r\n        trigger: true\r\n    },\r\n    metadata: {\r\n        deviceName: \"Simulador-Principal\"\r\n    },\r\n    msgType: \"POST_TELEMETRY_REQUEST\"\r\n};"
         },
         "additionalInfo": {
           "description": "",
           "layoutX": 0,
           "layoutY": 210
-        }
-      },
-      {
-        "type": "org.thingsboard.rule.engine.debug.TbMsgGeneratorNode",
-        "name": "GENERADOR",
-        "debugSettings": null,
-        "singletonMode": false,
-        "queueName": null,
-        "configurationVersion": 2,
-        "configuration": {
-          "msgCount": 0,
-          "periodInSeconds": 5,
-          "scriptLang": "TBEL",
-          "jsScript": "var msg = { temp: 42, humidity: 77 };\nvar metadata = { data: 40 };\nvar msgType = \"POST_TELEMETRY_REQUEST\";\n\nreturn { msg: msg, metadata: metadata, msgType: msgType };",
-          "tbelScript": "var msg = { \r\n    // Fotovoltaica (FV)\r\n    \"fv_p_in\": Math.floor(Math.random() * (5000 - 4000) + 4000), \r\n    \"fv_v_in\": 240,\r\n    \r\n    // Eólico (WIND)\r\n    \"wind_p_dc\": Math.floor(Math.random() * (2000 - 500) + 500),\r\n    \r\n    // Batería (BATT)\r\n    \"batt_soc\": 75,\r\n    \"batt_p\": 1200, // Positivo es cargando\r\n    \r\n    // Red (GRID) e Inversor (INV)\r\n    \"grid_p_import\": 0,\r\n    \"inv_eff\": 96,\r\n    \r\n    // Consumo Casa (HOUSE)\r\n    \"house_p_load\": 3500 \r\n};\r\nvar metadata = { data_type: \"simulated\" };\r\nvar msgType = \"POST_TELEMETRY_REQUEST\";\r\n\r\nreturn { msg: msg, metadata: metadata, msgType: msgType };",
-          "originatorId": "13814000-1dd2-11b2-8080-808080808080",
-          "originatorType": "RULE_NODE"
-        },
-        "additionalInfo": {
-          "description": "",
-          "layoutX": 179,
-          "layoutY": 456
-        }
-      },
-      {
-        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
-        "name": "Calculos animacion",
-        "debugSettings": null,
-        "singletonMode": false,
-        "queueName": null,
-        "configurationVersion": 0,
-        "configuration": {
-          "scriptLang": "JS",
-          "jsScript": "// Calculamos el porcentaje de carga respecto al máximo (ej. 5000W)\r\nmsg.fv_ratio = msg.fv_p_in / 5000; \r\nmsg.house_ratio = msg.house_p_load / 6000;\r\n\r\n// Determinamos el color del Inversor según eficiencia\r\nmsg.inv_color = msg.inv_eff > 95 ? 'green' : (msg.inv_eff > 80 ? 'orange' : 'red');\r\n\r\nreturn {msg: msg, metadata: metadata, msgType: msgType};",
-          "tbelScript": "return {msg: msg, metadata: metadata, msgType: msgType};"
-        },
-        "additionalInfo": {
-          "description": "",
-          "layoutX": 526,
-          "layoutY": 418
         }
       },
       {
@@ -371,6 +336,76 @@
           "layoutX": 531,
           "layoutY": 643
         }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.debug.TbMsgGeneratorNode",
+        "name": "Generador de enrgia",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 2,
+        "configuration": {
+          "msgCount": 0,
+          "periodInSeconds": 5,
+          "scriptLang": "TBEL",
+          "jsScript": "var fv_p_in       = +(Math.random() * 3).toFixed(2);\r\n    var wind_p_dc     = +(Math.random() * 3).toFixed(2);\r\n    var grid_p_import = +(Math.random() * 3).toFixed(2);\r\n    \r\n    var p_auto = +(-Math.random() * 3).toFixed(2);\r\n\r\n    var batt_p = +((Math.random() * 6) - 3).toFixed(2);\r\n    var batt_soc = +(((batt_p + 3) / 6) * 100).toFixed(0);\r\n\r\n    var house_p_load = fv_p_in + wind_p_dc + grid_p_import + p_auto + batt_p;\r\n\r\n    return {\r\n        msg: {\r\n            fv_p_in: fv_p_in,\r\n            wind_p_dc: wind_p_dc,\r\n            grid_p_import: grid_p_import,\r\n            p_auto: p_auto,\r\n            batt_p: batt_p,\r\n            batt_soc: batt_soc,\r\n            house_p_load: +house_p_load.toFixed(2)\r\n        },\r\n        metadata: prevMetadata, \r\n        msgType: prevMsgType\r\n        \r\n    };",
+          "tbelScript": "return {\r\n    msg: {\r\n        trigger: true\r\n    },\r\n    metadata: {\r\n        deviceName: \"Simulador-Principal\"\r\n    },\r\n    msgType: \"POST_TELEMETRY_REQUEST\"\r\n};",
+          "originatorId": "13814000-1dd2-11b2-8080-808080808080",
+          "originatorType": "RULE_NODE"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 34,
+          "layoutY": 377
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbChangeOriginatorNode",
+        "name": "Auto",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "originatorSource": "ENTITY",
+          "entityType": "DEVICE",
+          "entityNamePattern": "CAR-01",
+          "relationsQuery": {
+            "direction": "FROM",
+            "maxLevel": 1,
+            "filters": [
+              {
+                "relationType": "Contains",
+                "entityTypes": [],
+                "negate": false
+              }
+            ],
+            "fetchLastLevelOnly": false
+          }
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 521,
+          "layoutY": 422
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "calculos",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "// La lógica de generación se queda dentro de la función\r\nvar fv_p_in       = +(Math.random() * 3).toFixed(2);\r\nvar wind_p_dc     = +(Math.random() * 3).toFixed(2);\r\nvar grid_p_import = +(Math.random() * 3).toFixed(2);\r\nvar p_auto        = +(-Math.random() * 3).toFixed(2);\r\n\r\nvar batt_p        = +((Math.random() * 6) - 3).toFixed(2);\r\nvar batt_soc      = +(((batt_p + 3) / 6) * 100).toFixed(0);\r\n\r\nvar house_p_load  = fv_p_in + wind_p_dc + grid_p_import + p_auto + batt_p;\r\n\r\n// IMPORTANTE: Este es el formato que ThingsBoard necesita para que el flujo siga\r\nreturn {\r\n    msg: {\r\n        fv_p_in: fv_p_in,\r\n        wind_p_dc: wind_p_dc,\r\n        grid_p_import: grid_p_import,\r\n        p_auto: p_auto,\r\n        batt_p: batt_p,\r\n        batt_soc: batt_soc,\r\n        house_p_load: +house_p_load.toFixed(2)\r\n    },\r\n    msgType: \"POST_TELEMETRY_REQUEST\"\r\n \r\n};",
+          "tbelScript": "return {msg: msg, metadata: metadata, msgType: msgType};"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 221,
+          "layoutY": 472
+        }
       }
     ],
     "connections": [
@@ -411,37 +446,7 @@
       },
       {
         "fromIndex": 8,
-        "toIndex": 9,
-        "type": "Success"
-      },
-      {
-        "fromIndex": 8,
-        "toIndex": 10,
-        "type": "Success"
-      },
-      {
-        "fromIndex": 8,
-        "toIndex": 11,
-        "type": "Success"
-      },
-      {
-        "fromIndex": 8,
-        "toIndex": 12,
-        "type": "Success"
-      },
-      {
-        "fromIndex": 8,
-        "toIndex": 13,
-        "type": "Success"
-      },
-      {
-        "fromIndex": 8,
-        "toIndex": 14,
-        "type": "Success"
-      },
-      {
-        "fromIndex": 8,
-        "toIndex": 15,
+        "toIndex": 0,
         "type": "Success"
       },
       {
@@ -471,12 +476,47 @@
       },
       {
         "fromIndex": 14,
-        "toIndex": 0,
+        "toIndex": 16,
         "type": "Success"
       },
       {
         "fromIndex": 15,
         "toIndex": 0,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 16,
+        "toIndex": 8,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 16,
+        "toIndex": 9,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 16,
+        "toIndex": 10,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 16,
+        "toIndex": 11,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 16,
+        "toIndex": 12,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 16,
+        "toIndex": 13,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 16,
+        "toIndex": 15,
         "type": "Success"
       }
     ],
